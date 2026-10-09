@@ -1,0 +1,21 @@
+.app-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-sidebar) - 1);
+  border: none;
+  padding: 0;
+  margin: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  cursor: pointer;
+}
+
+@media (min-width: 901px) {
+  .sidebar-scrim {
+    display: none;
+  }
+}

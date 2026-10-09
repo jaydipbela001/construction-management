@@ -1,0 +1,90 @@
+.expense-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.expense-cell__title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.expense-cell__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.toolbar--stack {
+  border-bottom: none;
+  padding-bottom: var(--space-2);
+}
+
+.toolbar--dates {
+  border-bottom: 1px solid var(--color-border);
+  padding-top: 0;
+}
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.date-filter .form-control {
+  width: auto;
+}
+
+@media (max-width: 640px) {
+  .toolbar--dates {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .date-filter {
+    justify-content: space-between;
+  }
+  .date-filter .form-control {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* ---- Expense mobile card (used inside DataTable on phones) ---- */
+.expense-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.expense-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.expense-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.expense-card__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.expense-card__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.expense-card__amount {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}

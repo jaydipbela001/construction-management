@@ -1,0 +1,21 @@
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  width: 100%;
+}
+
+.loading-spinner__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}

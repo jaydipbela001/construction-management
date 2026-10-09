@@ -1,0 +1,864 @@
+# Build a Complete Construction Management Admin Panel
+
+## 1. Project Overview
+
+Build a complete, production-oriented Construction Management Admin Panel for managing multiple independent construction projects.
+
+This is a simple construction management application for a single administrator. There is no customer panel, contractor panel, employee panel, or public registration system.
+
+The admin should be able to create multiple construction projects and manage custom construction materials, prices, quantities, and expenses separately for each project.
+
+The application must be fully functional, responsive, maintainable, and deployable on Vercel.
+
+Do not build only a UI prototype. Implement the frontend, backend APIs, MongoDB integration, authentication, CRUD operations, validation, loading states, and error handling.
+
+## 2. Mandatory Technology Stack
+
+### Frontend
+
+* React.js
+* JavaScript only
+* Vite
+* React Router
+* Vanilla CSS
+* Fetch API or Axios for HTTP requests
+* Reusable React components
+
+### Backend
+
+* Node.js
+* Express.js
+* JavaScript only
+* MongoDB Atlas
+* Mongoose
+* JWT authentication
+* bcrypt or bcryptjs for password hashing
+
+### Deployment
+
+* Vercel for hosting the frontend and serverless backend
+* MongoDB Atlas for persistent database storage
+* Vercel environment variables for secrets and configuration
+
+STRICT RULES:
+
+* Do not use TypeScript.
+* Do not create .ts or .tsx files.
+* Do not use Tailwind CSS.
+* Do not use Bootstrap.
+* Do not use CSS-in-JS.
+* Do not use a traditional always-running Express server as the production deployment architecture.
+* Do not use local JSON files as the production database.
+* Do not store business records in browser localStorage as a replacement for MongoDB.
+* Use plain JavaScript and separate CSS files for components and pages.
+* Use one central global CSS file for design tokens and common styles.
+
+## 3. Design System and Theme
+
+Create a professional, modern construction management dashboard.
+
+Use this color palette:
+
+* Primary navy: #1E293B
+* Primary accent construction orange: #F59E0B
+* Main background: #F8FAFC
+* Card background: #FFFFFF
+* Primary text: #0F172A
+* Secondary text: #64748B
+* Border: #E2E8F0
+* Success: #16A34A
+* Warning: #D97706
+* Error: #DC2626
+* Information: #2563EB
+
+Use Inter as the main font family.
+
+Design characteristics:
+
+* Professional and minimal dashboard.
+* White cards with subtle borders and shadows.
+* Navy sidebar with clear active navigation.
+* Orange primary buttons and selected accents.
+* Clean tables, forms, badges, dialogs, and dashboard statistics.
+* Consistent spacing, border radius, typography, and iconography.
+* Use Lucide React icons if needed.
+* Avoid excessive gradients, decorative animations, and unnecessary colors.
+* Use accessible color contrast and visible keyboard focus states.
+
+### Global CSS requirements
+
+Create frontend/src/index.css as the central global stylesheet.
+
+Define CSS variables for:
+
+* All theme colors.
+* Font family and font sizes.
+* Font weights and line heights.
+* Spacing scale.
+* Border colors and radii.
+* Box shadows.
+* Sidebar dimensions.
+* Header dimensions.
+* Layout widths.
+* Transition durations.
+* Common responsive breakpoints where practical.
+
+Example variables:
+
+:root {
+--color-primary: #1E293B;
+--color-accent: #F59E0B;
+--color-background: #F8FAFC;
+--color-surface: #FFFFFF;
+--color-text: #0F172A;
+--color-text-secondary: #64748B;
+--color-border: #E2E8F0;
+--color-success: #16A34A;
+--color-warning: #D97706;
+--color-danger: #DC2626;
+--font-family-base: 'Inter', sans-serif;
+--radius-md: 10px;
+--radius-lg: 14px;
+}
+
+This is an illustrative starting point. Expand the design tokens appropriately.
+
+IMPORTANT: Components must reference the global CSS variables. Do not repeatedly hardcode hex colors throughout component stylesheets. Changing a theme variable should update the entire application consistently.
+
+Every major component and page must have its own CSS file, such as Navbar.jsx with Navbar.css and Projects.jsx with Projects.css.
+
+Use global CSS for shared tokens, resets, typography, and reusable primitives. Keep page-specific and component-specific styles in their respective files.
+
+## 4. Application Layout
+
+Create an authenticated admin dashboard with:
+
+### Desktop
+
+* Fixed or collapsible left sidebar.
+* Top navigation bar.
+* Main content area.
+* Breadcrumb navigation where appropriate.
+* Responsive page containers.
+* Clear page titles and primary actions.
+
+### Mobile
+
+* Fully responsive layout.
+* Collapsible sidebar or accessible slide-out navigation.
+* Compact header with a menu button.
+* Single-column dashboard cards when necessary.
+* Mobile-friendly forms and buttons.
+* Tables that adapt using horizontal scrolling or mobile card layouts.
+* No horizontal overflow on the overall page.
+* Touch-friendly controls.
+* Proper modal and dialog sizing on small screens.
+
+The application must work on desktop, tablet, and mobile phone screens.
+
+## 5. Authentication
+
+Create a single-admin authentication system.
+
+Requirements:
+
+* Login using email and password.
+* Securely hash the password.
+* Issue a signed JWT after successful authentication.
+* Protect all dashboard routes.
+* Protect all private backend APIs using authentication middleware.
+* Include logout.
+* Restore authentication safely after page refresh.
+* Handle expired or invalid tokens.
+* Never expose passwords, password hashes, or JWT secrets in API responses.
+* Do not create a public admin registration endpoint.
+* Provide a secure initial admin creation method, such as a protected seed script or one-time setup procedure.
+* Read JWT secrets from environment variables.
+
+Do not hardcode default production credentials into the source code.
+
+## 6. Dashboard Page
+
+Create a dashboard displaying useful summary cards:
+
+* Total construction projects.
+* Active projects.
+* Completed projects.
+* Total distinct material entries across projects.
+* Total estimated material value.
+* Total recorded expenses.
+* Recent projects.
+* Recently added materials or recent expense transactions.
+
+Display useful project summaries and empty states when there is no data.
+
+All statistics must come from real backend data, not hardcoded examples.
+
+Clearly distinguish estimated material value from actual recorded expenses. Do not represent estimated inventory value as money actually spent.
+
+## 7. Construction Projects Module
+
+The admin can create, view, update, and delete construction projects.
+
+Each project should contain:
+
+* Project name.
+* Unique project code, generated securely or validated for uniqueness.
+* Description.
+* Site address or location.
+* Start date.
+* Expected completion date.
+* Actual completion date, if applicable.
+* Status: planned, active, on_hold, or completed.
+* Optional notes.
+* Created date and updated date.
+
+Create the following screens:
+
+### Projects List
+
+* Display projects in a searchable, paginated table or responsive card layout.
+* Search by project name or project code.
+* Filter by status.
+* Sort by name, date, or status.
+* Show project status badges.
+* Provide View, Edit, and Delete actions.
+* Provide a prominent New Construction Project button.
+
+### Create Project
+
+* Show a form for the project details.
+* Validate required fields and date relationships.
+* Save the project to MongoDB.
+* Redirect to the newly created project's details page after successful creation.
+
+### Project Details
+
+* Display all project information.
+* Show project-specific materials.
+* Show project-specific expenses.
+* Show estimated material value and recorded expense totals.
+* Provide Add Material and Add Expense actions.
+* Allow the admin to edit project information.
+
+### Critical business rule
+
+Creating a new construction project must not automatically create any material entries.
+
+Every new project must begin with an empty materials list and an empty expense list unless data is explicitly added by the admin.
+
+Never copy materials, expenses, or other records from an existing project when creating a new project.
+
+Each project must remain independent of all other projects.
+
+When a project is selected, all project-specific operations must use its MongoDB project ID.
+
+Deleting a project must never accidentally delete records belonging to another project.
+
+For destructive operations, show a confirmation dialog. Use a documented and safe policy for related materials and expenses, such as a MongoDB transaction where supported or an explicit archive/restriction strategy.
+
+## 8. Project-Specific Materials Module
+
+This is one of the most important modules.
+
+Each construction project has its own materials list.
+
+There must be no predefined materials automatically inserted into a project.
+
+The admin creates every material manually.
+
+Examples of materials the admin might create:
+
+* Iron or steel.
+* Wood.
+* Sand.
+* Cement.
+* Bricks.
+* Gravel.
+* Tiles.
+* Paint.
+* Pipes.
+* Electrical materials.
+* Any custom construction material.
+
+These are examples only, not default database records.
+
+### Add Material Form
+
+Fields:
+
+* Material name — required.
+* Category — optional.
+* Description — optional.
+* Quantity — required and greater than zero.
+* Unit — required, such as kg, ton, bag, piece, cubic meter, liter, or another custom unit.
+* Unit price — required and non-negative.
+* Supplier — optional.
+* Purchase date — optional.
+* Notes — optional.
+
+The admin should be able to enter a custom material name and a custom unit.
+
+Do not restrict material creation to a fixed predefined dropdown of material names.
+
+If a unit selector is provided, include a Custom option that allows the admin to enter another unit.
+
+### Material List
+
+For the selected project, display:
+
+* Material name.
+* Category.
+* Quantity.
+* Unit.
+* Unit price.
+* Total estimated material value.
+* Supplier.
+* Actions.
+
+Calculate:
+
+lineTotal = quantity × unitPrice
+
+Calculate the estimated material value for a project by summing its material line totals.
+
+Format currency consistently and use a configurable currency setting, initially INR (₹).
+
+Do not hardcode currency formatting independently in every component.
+
+### Material Operations
+
+Implement:
+
+* Create material.
+* Read materials for the selected project.
+* Edit material.
+* Delete material with confirmation.
+* Search materials.
+* Filter by category.
+* Sort and paginate where appropriate.
+
+When editing quantity or price, update the displayed line total immediately using validated values and persist the changes through the backend.
+
+### Project Isolation
+
+A material must belong to exactly one construction project.
+
+Store projectId as a MongoDB ObjectId reference.
+
+Every material API must validate the requested project and enforce project ownership within the current admin's authorized data scope.
+
+For example, a material created in Project A must not appear in Project B.
+
+The same material name may be used in both projects with different quantities, units, and prices.
+
+Do not create a global inventory catalog as a mandatory feature. This application's primary requirement is independent, project-specific material management.
+
+## 9. Expenses Module
+
+Create an expense tracking module associated with individual construction projects.
+
+Expense fields:
+
+* Project ID.
+* Expense title.
+* Category.
+* Amount.
+* Expense date.
+* Payment method, if applicable.
+* Supplier or payee, if applicable.
+* Notes.
+* Created date and updated date.
+
+Provide:
+
+* Add expense.
+* Edit expense.
+* Delete expense with confirmation.
+* Search and filter expenses.
+* Filter by project, category, and date range.
+* Show total expenses for the selected project.
+* Show recent expense transactions.
+
+Do not automatically create an expense whenever a material is added.
+
+Adding a material represents a material record or estimated value. An actual expense must be recorded explicitly by the admin.
+
+If purchase tracking is implemented, create the expense through an explicit purchase or expense operation and prevent accidental duplicate expense records.
+
+Do not subtract expense amounts from material quantities unless a proper stock movement feature is explicitly implemented.
+
+## 10. MongoDB Data Models
+
+Use Mongoose schemas with validation, timestamps, and appropriate indexes.
+
+### Admin
+
+* email: required, unique, normalized.
+* passwordHash: required.
+* createdAt.
+* updatedAt.
+
+### Project
+
+* name.
+* projectCode: unique.
+* description.
+* location.
+* startDate.
+* expectedCompletionDate.
+* actualCompletionDate.
+* status.
+* notes.
+* createdAt.
+* updatedAt.
+
+### Material
+
+* projectId: required ObjectId reference to Project.
+* name: required.
+* category.
+* description.
+* quantity: required positive number.
+* unit: required string.
+* unitPrice: required non-negative number.
+* supplier.
+* purchaseDate.
+* notes.
+* createdAt.
+* updatedAt.
+
+### Expense
+
+* projectId: required ObjectId reference to Project.
+* title.
+* category.
+* amount: required non-negative number.
+* expenseDate.
+* paymentMethod.
+* payee.
+* notes.
+* createdAt.
+* updatedAt.
+
+Validate every ObjectId, required field, numeric value, enum, and date on the backend.
+
+Prevent negative quantities, invalid amounts, and invalid prices.
+
+Consider decimal precision when calculating and storing monetary values. Avoid floating-point rounding errors in financial totals; use integer minor units or an appropriate decimal representation when practical.
+
+Use indexes for frequently queried fields such as projectId, project status, material name, and expense date.
+
+All production data must be stored in MongoDB Atlas.
+
+## 11. Backend API Design
+
+Use REST APIs with consistent JSON response structures.
+
+### Authentication
+
+* POST /api/auth/login
+* GET /api/auth/me
+* POST /api/auth/logout, if needed for the selected token strategy.
+
+### Projects
+
+* GET /api/projects
+* POST /api/projects
+* GET /api/projects/:projectId
+* PATCH /api/projects/:projectId
+* DELETE /api/projects/:projectId
+
+Support search, pagination, sorting, and status filters where appropriate.
+
+### Materials
+
+* GET /api/projects/:projectId/materials
+* POST /api/projects/:projectId/materials
+* GET /api/projects/:projectId/materials/:materialId
+* PATCH /api/projects/:projectId/materials/:materialId
+* DELETE /api/projects/:projectId/materials/:materialId
+
+### Expenses
+
+* GET /api/projects/:projectId/expenses
+* POST /api/projects/:projectId/expenses
+* GET /api/projects/:projectId/expenses/:expenseId
+* PATCH /api/projects/:projectId/expenses/:expenseId
+* DELETE /api/projects/:projectId/expenses/:expenseId
+
+### Dashboard
+
+* GET /api/dashboard/summary
+
+Return real aggregated statistics from MongoDB.
+
+For all project-specific routes, validate projectId and ensure the referenced material or expense belongs to that exact project.
+
+Never fetch a material only by materialId and assume it belongs to the project specified in the URL.
+
+Use HTTP status codes correctly:
+
+* 200 for successful reads and updates.
+* 201 for successful creation.
+* 400 for invalid input.
+* 401 for unauthenticated requests.
+* 403 for forbidden operations.
+* 404 for missing resources.
+* 409 for conflicts such as duplicate project codes.
+* 500 for unexpected server errors.
+
+Use consistent error responses and centralized error-handling middleware.
+
+## 12. Required Vercel Serverless Architecture
+
+The entire application must be designed for Vercel deployment.
+
+IMPORTANT: Vercel serverless functions are not ordinary, continuously running Express servers. Do not rely on app.listen() as the production startup mechanism.
+
+Use the following architecture:
+
+* The React frontend is built with Vite.
+* The backend is exposed through a Vercel-compatible serverless function.
+* Express is exported as a request handler.
+* MongoDB connections are reused and cached across warm function invocations where possible.
+* Every function invocation must be able to initialize safely when required.
+* No API should depend on in-memory state persisting between requests.
+* Do not use local files as a persistent database.
+* Do not depend on background processes, permanent in-process schedulers, or long-running server connections.
+* Keep API handlers compatible with Vercel's request and response lifecycle.
+* Avoid starting a separate production Express listener.
+* Ensure all API endpoints are routed correctly under /api.
+* Keep the application compatible with the selected Vercel Node.js runtime.
+
+Use a clear backend entry point such as:
+
+backend/api/index.js
+
+It should export the configured Express application as the serverless request handler.
+
+Create the Express application separately in:
+
+backend/src/app.js
+
+Implement MongoDB connection reuse in:
+
+backend/src/config/db.js
+
+The database connection helper should cache an existing connection or connection promise when possible and avoid opening unnecessary new connections during repeated warm invocations.
+
+Do not assume a single persistent process or global state shared across all serverless instances.
+
+### Vercel routing
+
+Create and document the correct root vercel.json for the chosen monorepo layout.
+
+Ensure the configuration:
+
+* Builds the Vite frontend.
+* Exposes backend serverless functions.
+* Routes /api requests to the backend.
+* Routes frontend page navigation to the React application without overriding API routes.
+* Uses valid, supported Vercel configuration syntax.
+* Does not depend on an obsolete deployment configuration.
+
+Choose a consistent root-directory and build-output strategy. Do not mix incompatible root-level and subdirectory deployment approaches.
+
+If the selected deployment architecture needs separate Vercel projects rather than one combined project, explain why and provide working configurations for both. Prefer one Vercel project when practical.
+
+Ensure all production API calls use a configurable API base URL. When the frontend and backend are deployed on the same origin, use a relative /api base URL.
+
+For local development, configure Vite to proxy /api requests to the Express development server, or document a supported alternative.
+
+Keep any app.listen() usage limited to local development if it is needed. It must not be required for the production Vercel serverless deployment.
+
+Do not claim deployment compatibility without validating the configuration and explaining the required Vercel project settings.
+
+## 13. Security and Reliability
+
+Implement:
+
+* Environment-based secrets.
+* Password hashing.
+* JWT verification.
+* Input validation.
+* Safe MongoDB query handling.
+* Rate limiting on login.
+* Helmet security headers.
+* Correct CORS configuration where cross-origin access is required.
+* Centralized error handling.
+* Appropriate request body limits.
+* Protection against unauthorized resource access.
+* No secret values in API responses or logs.
+* Safe handling of expired tokens.
+
+Never trust frontend-provided totals when calculating project summaries. Recalculate totals on the backend from validated MongoDB records.
+
+Do not expose stack traces or database credentials in production errors.
+
+## 14. Frontend Folder Structure
+
+Use this structure or an equivalent well-organized JavaScript structure:
+
+frontend/
+index.html
+package.json
+vite.config.js
+src/
+main.jsx
+App.jsx
+index.css
+assets/
+components/
+Navbar.jsx
+Navbar.css
+Sidebar.jsx
+Sidebar.css
+PageHeader.jsx
+PageHeader.css
+Modal.jsx
+Modal.css
+ConfirmDialog.jsx
+ConfirmDialog.css
+DataTable.jsx
+DataTable.css
+StatCard.jsx
+StatCard.css
+LoadingSpinner.jsx
+LoadingSpinner.css
+EmptyState.jsx
+EmptyState.css
+ProtectedRoute.jsx
+pages/
+Login.jsx
+Login.css
+Dashboard.jsx
+Dashboard.css
+Projects.jsx
+Projects.css
+CreateProject.jsx
+CreateProject.css
+ProjectDetails.jsx
+ProjectDetails.css
+Materials.jsx
+Materials.css
+Expenses.jsx
+Expenses.css
+NotFound.jsx
+NotFound.css
+services/
+api.js
+authService.js
+projectService.js
+materialService.js
+expenseService.js
+dashboardService.js
+context/
+AuthContext.jsx
+hooks/
+utils/
+
+Do not place the entire application in App.jsx.
+
+Use reusable components, page-level stylesheets, shared API services, and centralized authentication handling.
+
+## 15. Backend Folder Structure
+
+backend/
+api/
+index.js
+src/
+app.js
+config/
+db.js
+models/
+Admin.js
+Project.js
+Material.js
+Expense.js
+controllers/
+authController.js
+projectController.js
+materialController.js
+expenseController.js
+dashboardController.js
+routes/
+authRoutes.js
+projectRoutes.js
+materialRoutes.js
+expenseRoutes.js
+dashboardRoutes.js
+middleware/
+authMiddleware.js
+errorMiddleware.js
+validateRequest.js
+services/
+utils/
+ApiError.js
+asyncHandler.js
+scripts/
+createAdmin.js
+
+Keep controllers, routes, models, middleware, configuration, and business logic separated.
+
+Use JavaScript files throughout. Add tests for important business rules and API behavior.
+
+## 16. User Experience Requirements
+
+Every screen must support:
+
+* Loading indicators.
+* Clear success and error feedback.
+* Empty states.
+* Form validation messages.
+* Disabled submit buttons during submission.
+* Confirmation dialogs for destructive operations.
+* Search and filters where relevant.
+* Pagination for larger lists.
+* Consistent currency and date formatting.
+
+After creating a project, redirect to that project's details page.
+
+After creating a material, refresh the current project's material list and update its totals.
+
+After creating an expense, refresh the current project's expense list and dashboard totals.
+
+Do not reload the entire browser page for ordinary CRUD operations.
+
+Do not display hardcoded demo data as if it were saved database data.
+
+If demo data is needed for development, provide a separate optional seed script.
+
+## 17. Testing Requirements
+
+Verify these scenarios:
+
+1. Admin can log in and access the dashboard.
+2. Unauthenticated users cannot access protected APIs.
+3. Admin can create multiple projects.
+4. A newly created project has no materials by default.
+5. Admin can add custom materials to Project A.
+6. Project B remains empty when materials are added to Project A.
+7. The same material name can have different prices and quantities in different projects.
+8. Material totals are calculated correctly.
+9. Invalid quantities and negative prices are rejected.
+10. Expenses remain associated with the correct project.
+11. A material from Project A cannot be accessed or modified through Project B's material endpoint.
+12. Project summaries and dashboard statistics reflect saved database data.
+13. Search, filters, and pagination work correctly.
+14. The application handles database errors and expired JWTs.
+15. The frontend works on desktop, tablet, and mobile.
+16. API endpoints work under Vercel's serverless deployment architecture.
+17. Refreshing a deployed frontend route does not produce an unexpected 404.
+18. Creating or editing records persists correctly after a new request or serverless cold start.
+
+## 18. Environment Variables and Documentation
+
+Provide a root .env.example or clearly documented frontend/backend environment templates.
+
+Include appropriate variables such as:
+
+* MONGODB_URI
+* JWT_SECRET
+* JWT_EXPIRES_IN
+* NODE_ENV
+* FRONTEND_URL, if required
+* VITE_API_BASE_URL, if required by the chosen setup
+
+Never commit real secrets.
+
+Explain which variables belong in Vercel project settings and which are used for local development.
+
+Generate a README.md containing:
+
+* Project overview.
+* Technology stack.
+* Folder structure.
+* Local setup instructions.
+* MongoDB Atlas configuration.
+* Initial admin creation instructions.
+* Environment variables.
+* Local development commands.
+* API documentation.
+* Production deployment steps.
+* Vercel configuration.
+* Common deployment and database troubleshooting.
+
+## 19. Implementation Workflow
+
+Build the project in the following order:
+
+1. Create the complete folder structure.
+2. Configure the Vite frontend.
+3. Configure the Express application and MongoDB connection.
+4. Implement Vercel-compatible serverless routing.
+5. Implement authentication and protected routes.
+6. Create MongoDB models.
+7. Implement project CRUD APIs.
+8. Implement project-specific material CRUD APIs.
+9. Implement expense CRUD APIs.
+10. Implement dashboard aggregation APIs.
+11. Build the global CSS design system.
+12. Build reusable layout components.
+13. Build responsive dashboard and project pages.
+14. Connect every page to the real backend.
+15. Add validation, loading states, errors, and confirmations.
+16. Test project isolation and calculations.
+17. Validate production build and deployment configuration.
+18. Document local setup and Vercel deployment.
+
+Generate complete working code for all required files. Do not return only snippets, pseudocode, or a high-level explanation.
+
+If the output is too large for one response, implement the project in clearly numbered phases and continue from the previous phase without changing the architecture or omitting required files.
+
+Before declaring the project complete, identify any remaining unimplemented features, run the available checks, and provide the exact commands and Vercel settings needed to deploy it.
+
+The final result must be a clean, responsive, secure, maintainable Construction Management Admin Panel using React, JavaScript, Vanilla CSS, Node.js, Express.js, MongoDB, and Vercel serverless functions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5. Important Vercel deployment note
+
+For this project, do not simply deploy a traditional Express server and expect it to run continuously on Vercel.
+
+A suitable architecture is:
+
+React + Vite frontend
+
+Build and serve the admin interface
+
+Vercel serverless API
+
+Express routes, controllers, and middleware
+
+/api/projects · /api/materials · /api/expenses
+
+MongoDB Atlas
+
+Persistent projects, materials, expenses, and admin data
+
+The key implementation details are:
+
+Export the Express application as a Vercel-compatible handler rather than depending on app.listen() in production.
+
+Cache MongoDB connections where possible to avoid unnecessary reconnections.
+
+Store credentials and secrets in Vercel environment variables.
+
+Configure routing so /api/* reaches the backend and React routes reach the frontend.
+
+Keep all business data in MongoDB, not in serverless memory or local files.
+
+My recommendation: Build the first version with only four main modules — Dashboard, Projects, Materials, and Expenses — plus admin login. This keeps the application simple while giving you a solid foundation to add purchase tracking, suppliers, reports, or PDF exports later.
