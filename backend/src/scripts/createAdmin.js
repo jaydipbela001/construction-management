@@ -1,9 +1,4 @@
 /* eslint-disable no-console */
-// Secure initial admin creation / password reset.
-// Usage:
-//   ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='strong-password' node src/scripts/createAdmin.js
-// or:
-//   node src/scripts/createAdmin.js admin@example.com 'strong-password'
 require('../config/loadEnv')();
 const mongoose = require('mongoose');
 const connectDB = require('../config/db');
@@ -12,6 +7,7 @@ const Admin = require('../models/Admin');
 async function run() {
   const email = (process.argv[2] || process.env.ADMIN_EMAIL || '').toLowerCase().trim();
   const password = process.argv[3] || process.env.ADMIN_PASSWORD || '';
+  const role = (process.argv[4] || process.env.ADMIN_ROLE || 'superadmin').trim().toLowerCase();
 
   if (!email || !password) {
     console.error('Email and password are required.');
@@ -24,6 +20,11 @@ async function run() {
     process.exit(1);
   }
 
+  if (role !== 'admin' && role !== 'superadmin') {
+    console.error('Role must be admin or superadmin.');
+    process.exit(1);
+  }
+
   await connectDB();
 
   const passwordHash = await Admin.hashPassword(password);
@@ -31,11 +32,12 @@ async function run() {
 
   if (existing) {
     existing.passwordHash = passwordHash;
+    existing.role = role;
     await existing.save();
-    console.log(`Updated password for existing admin: ${email}`);
+    console.log(`Updated admin: ${email} (role: ${role})`);
   } else {
-    await Admin.create({ email, passwordHash });
-    console.log(`Created admin: ${email}`);
+    await Admin.create({ email, passwordHash, role });
+    console.log(`Created admin: ${email} (role: ${role})`);
   }
 
   await mongoose.connection.close();

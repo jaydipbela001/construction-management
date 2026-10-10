@@ -10,6 +10,7 @@ const { validateRequest } = require('../middleware/validateRequest');
 const { validateCreateProject, validateUpdateProject } = require('../validators/projectValidator');
 const materialRoutes = require('./materialRoutes');
 const expenseRoutes = require('./expenseRoutes');
+const reportRoutes = require('./reportRoutes');
 
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router
 // mergeParams (in those routers) makes :projectId available to their controllers.
 router.use('/:projectId/materials', materialRoutes);
 router.use('/:projectId/expenses', expenseRoutes);
+router.use('/:projectId/export', reportRoutes);
 
 module.exports = router;

@@ -4,6 +4,8 @@
    ============================================================ */
 
 :root {
+  color-scheme: light;
+
   /* ---- Brand colors ---- */
   --color-primary: #1e293b;
   --color-primary-600: #334155;
@@ -35,6 +37,13 @@
   --color-danger-soft: #fee2e2;
   --color-info: #2563eb;
   --color-info-soft: #dbeafe;
+
+  /* ---- Semantic extras ---- */
+  --table-row-hover: #f9fbfd;
+  --navbar-bg: rgba(255, 255, 255, 0.9);
+  --app-focus-ring: rgba(245, 158, 11, 0.18);
+  --chart-grid: #e2e8f0;
+  --chart-text: #64748b;
 
   /* ---- Typography ---- */
   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
@@ -372,7 +381,7 @@ ol {
 .form-control:focus {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+  box-shadow: 0 0 0 3px var(--app-focus-ring);
 }
 
 .form-control::placeholder {
@@ -395,6 +404,48 @@ select.form-control {
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   padding-right: 2rem;
+}
+
+/* Password input with a show/hide toggle */
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field .form-control {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.password-field__toggle {
+  position: absolute;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.password-field__toggle:hover {
+  color: var(--color-text);
+  background-color: var(--color-surface-muted);
+}
+
+.password-field__toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.password-field__toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .form-error {
@@ -523,7 +574,7 @@ select.form-control {
 }
 
 .table tbody tr:hover {
-  background-color: #f9fbfd;
+  background-color: var(--table-row-hover);
 }
 
 .table td.num,
@@ -675,5 +726,150 @@ select.form-control {
   }
   .page {
     padding: var(--space-5) var(--space-4) var(--space-10);
+  }
+}
+
+/* ============================================================
+   Dark theme
+   ============================================================ */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* ---- Surfaces ---- */
+  --color-background: #0b1220;
+  --color-surface: #121a2b;
+  --color-surface-muted: #1c2638;
+
+  /* ---- Text ---- */
+  --color-text: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-text-inverse: #f8fafc;
+
+  /* ---- Borders ---- */
+  --color-border: #243042;
+  --color-border-strong: #334155;
+
+  /* ---- Status softs (darker so backgrounds blend) ---- */
+  --color-success-soft: #12291a;
+  --color-warning-soft: #2a2110;
+  --color-danger-soft: #2a1416;
+  --color-info-soft: #122238;
+  --color-accent-soft: #2a2110;
+
+  /* ---- Semantic extras ---- */
+  --table-row-hover: #182236;
+  --navbar-bg: rgba(11, 18, 32, 0.9);
+  --app-focus-ring: rgba(245, 158, 11, 0.28);
+  --chart-grid: #243042;
+  --chart-text: #94a3b8;
+}
+
+[data-theme='dark'] select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+[data-theme='dark'] .alert-error {
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+[data-theme='dark'] .alert-success {
+  border-color: #14532d;
+  color: #86efac;
+}
+[data-theme='dark'] .alert-info {
+  border-color: #1e3a8a;
+  color: #93c5fd;
+}
+
+/* ============================================================
+   Print / PDF report
+   Always output the LIGHT theme tokens so text stays dark and
+   readable on paper, even when the app is using dark mode.
+   ============================================================ */
+@media print {
+  :root {
+    color-scheme: light;
+
+    /* ---- Brand colors ---- */
+    --color-primary: #1e293b;
+    --color-primary-600: #334155;
+    --color-primary-400: #475569;
+    --color-accent: #f59e0b;
+    --color-accent-dark: #d97706;
+    --color-accent-soft: #fef3c7;
+
+    /* ---- Surfaces ---- */
+    --color-background: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f1f5f9;
+
+    /* ---- Text ---- */
+    --color-text: #0f172a;
+    --color-text-secondary: #64748b;
+    --color-text-inverse: #f8fafc;
+
+    /* ---- Borders ---- */
+    --color-border: #e2e8f0;
+    --color-border-strong: #cbd5e1;
+
+    /* ---- Status ---- */
+    --color-success: #16a34a;
+    --color-success-soft: #dcfce7;
+    --color-warning: #d97706;
+    --color-warning-soft: #fef3c7;
+    --color-danger: #dc2626;
+    --color-danger-soft: #fee2e2;
+    --color-info: #2563eb;
+    --color-info-soft: #dbeafe;
+
+    /* ---- Semantic extras ---- */
+    --table-row-hover: #ffffff;
+    --navbar-bg: #ffffff;
+    --app-focus-ring: rgba(245, 158, 11, 0.18);
+    --chart-grid: #e2e8f0;
+    --chart-text: #64748b;
+  }
+
+  body {
+    background: #ffffff;
+  }
+  .sidebar,
+  .navbar,
+  .sidebar-scrim,
+  .page-header__actions,
+  .project-tabs,
+  .no-print {
+    display: none !important;
+  }
+  .app-main,
+  .app-shell.is-collapsed .app-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  .app-content {
+    display: block !important;
+  }
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+  .card {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  [data-theme='dark'] body {
+    background: #ffffff;
+  }
+  [data-theme='dark'] .alert-error {
+    border-color: #b91c1c;
+    color: #7f1d1d;
+  }
+  [data-theme='dark'] .alert-success {
+    border-color: #16a34a;
+    color: #166534;
+  }
+  [data-theme='dark'] .alert-info {
+    border-color: #2563eb;
+    color: #1e40af;
   }
 }

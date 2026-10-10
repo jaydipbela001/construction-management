@@ -11,10 +11,13 @@ import {
   Trash2,
   TrendingUp,
   AlertCircle,
+  Download,
+  Printer,
 } from 'lucide-react';
 import projectService from '../services/projectService';
 import materialService from '../services/materialService';
 import expenseService from '../services/expenseService';
+import reportService from '../services/reportService';
 import PageHeader from '../components/PageHeader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatCard from '../components/StatCard';
@@ -51,6 +54,7 @@ export default function ProjectDetails() {
   const [error, setError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -85,6 +89,18 @@ export default function ProjectDetails() {
     } catch (err) {
       toast.error(err.message || 'Failed to delete project.');
       setDeleting(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await reportService.exportProjectSummary(projectId);
+      toast.success('Project summary CSV downloaded.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to export the project summary.');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -123,6 +139,19 @@ export default function ProjectDetails() {
         ]}
         actions={
           <>
+            <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
+              <Printer size={16} aria-hidden="true" />
+              Print
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleExport}
+              disabled={exporting}
+            >
+              <Download size={16} aria-hidden="true" />
+              {exporting ? 'Exporting…' : 'Export CSV'}
+            </button>
             <Link to={`/projects/${projectId}/materials`} className="btn btn-primary">
               <Plus size={16} aria-hidden="true" />
               Add Material

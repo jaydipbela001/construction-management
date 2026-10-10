@@ -45,4 +45,13 @@ async function protect(req, _res, next) {
   }
 }
 
-module.exports = { protect };
+function restrictTo(...roles) {
+  return (req, _res, next) => {
+    if (!req.admin || !roles.includes(req.admin.role)) {
+      throw new ApiError(403, 'You do not have permission to perform this action.');
+    }
+    return next();
+  };
+}
+
+module.exports = { protect, restrictTo };

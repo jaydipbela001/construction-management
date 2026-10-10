@@ -10,6 +10,20 @@
   gap: var(--space-5);
 }
 
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.chart-grid__wide {
+  grid-column: span 2;
+}
+
+.chart-cap {
+  font-size: var(--font-size-xs);
+}
+
 .dashboard-grid__wide {
   grid-column: span 2;
 }
@@ -73,6 +87,12 @@ a.dashboard-list__main:hover .dashboard-list__title {
   }
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-grid__wide {
+    grid-column: span 1;
   }
   .dashboard-grid__wide {
     grid-column: span 1;

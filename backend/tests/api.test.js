@@ -30,7 +30,7 @@ let token;
 let projectA;
 let projectB;
 
-async function api(method, path, { auth = true, body } = {}) {
+async function api(method, path, { auth = true, body, raw = false } = {}) {
   const headers = {};
   if (auth && token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
@@ -39,6 +39,7 @@ async function api(method, path, { auth = true, body } = {}) {
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+  if (raw) return { status: res.status, res, text: await res.text() };
   let json = null;
   try {
     json = await res.json();
@@ -48,12 +49,25 @@ async function api(method, path, { auth = true, body } = {}) {
   return { status: res.status, json };
 }
 
+// Perform a request with an explicit bearer token (for testing other accounts).
+async function apiAs(verb, path, asToken, { body } = {}) {
+  const headers = { Authorization: `Bearer ${asToken}` };
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const res = await fetch(`${baseUrl}${path}`, {
+    method: verb,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  const json = await res.json().catch(() => null);
+  return { status: res.status, json };
+}
+
 test('Construction Management API', { skip: !RUN && 'Set TEST_MONGODB_URI to run' }, async (t) => {
   await connectDB();
   await mongoose.connection.dropDatabase();
 
   const passwordHash = await Admin.hashPassword('StrongPass123!');
-  await Admin.create({ email: 'admin@test.com', passwordHash });
+  await Admin.create({ email: 'admin@test.com', passwordHash, role: 'superadmin' });
 
   const app = createApp();
   server = app.listen(0);
@@ -122,15 +136,144 @@ test('Construction Management API', { skip: !RUN && 'Set TEST_MONGODB_URI to run
     assert.ok(list.json.data.items.some((admin) => admin.email === 'second@test.com'));
   });
 
-  await t.test('rejects an invalid token', async () => {
-    const saved = token;
-    token = 'invalid.token.value';
-    const res = await api('GET', '/projects');
-    token = saved;
-    assert.equal(res.status, 401);
+  await t.test('lets an admin update their profile and change their password', async () => {
+    const login = await api('POST', '/auth/login', {
+      auth: false,
+      body: { email: 'second@test.com', password: 'SecondPass123!' },
+    });
+    const secondToken = login.json.data.token;
+
+    const renamed = await apiAs('PATCH', '/auth/profile', secondToken, {
+      body: { name: 'Site Supervisor' },
+    });
+    assert.equal(renamed.status, 200);
+    assert.equal(renamed.json.data.admin.name, 'Site Supervisor');
+
+    const reemail = await apiAs('PATCH', '/auth/profile', secondToken, {
+      body: { email: 'supervisor@test.com' },
+    });
+    assert.equal(reemail.status, 200);
+    assert.equal(reemail.json.data.admin.email, 'supervisor@test.com');
+
+    const duplicate = await apiAs('PATCH', '/auth/profile', secondToken, {
+      body: { email: 'admin@test.com' },
+    });
+    assert.equal(duplicate.status, 409);
+
+    const wrongCurrent = await apiAs('POST', '/auth/change-password', secondToken, {
+      body: { currentPassword: 'wrong-pass', newPassword: 'BrandNewPass123!' },
+    });
+    assert.equal(wrongCurrent.status, 400);
+
+    const changed = await apiAs('POST', '/auth/change-password', secondToken, {
+      body: { currentPassword: 'SecondPass123!', newPassword: 'BrandNewPass123!' },
+    });
+    assert.equal(changed.status, 200);
+
+    const relogin = await api('POST', '/auth/login', {
+      auth: false,
+      body: { email: 'supervisor@test.com', password: 'BrandNewPass123!' },
+    });
+    assert.equal(relogin.status, 200);
+
   });
 
-  await t.test('creates projects with unique codes and empty records', async () => {
+  await t.test('role-based permissions: superadmin vs admin', async () => {
+    // Create a regular admin (non-superadmin)
+    const adminPass = await Admin.hashPassword('AdminPass123!');
+    await Admin.create({ email: 'admin-user@test.com', passwordHash: adminPass, role: 'admin' });
+
+    // Log in as the regular admin
+    const adminLogin = await api('POST', '/auth/login', {
+      auth: false,
+      body: { email: 'admin-user@test.com', password: 'AdminPass123!' },
+    });
+    assert.equal(adminLogin.status, 200);
+    const adminToken = adminLogin.json.data.token;
+    assert.equal(adminLogin.json.data.admin.role, 'admin');
+
+    // Regular admin CANNOT create a superadmin
+    const superPass = await Admin.hashPassword('SuperPass123!');
+    const createSuper = await apiAs('POST', '/admins', adminToken, {
+      body: { email: 'new-super@test.com', password: 'SuperPass123!', role: 'superadmin' },
+    });
+    assert.equal(createSuper.status, 403, 'Regular admin should not be able to create superadmin');
+
+    // Regular admin CAN create an admin
+    const createAdmin = await apiAs('POST', '/admins', adminToken, {
+      body: { email: 'another-admin@test.com', password: 'AdminPass456!', role: 'admin' },
+    });
+    assert.equal(createAdmin.status, 201, 'Regular admin should be able to create admin');
+
+    // Regular admin CANNOT delete any admin
+    const listBefore = await apiAs('GET', '/admins', adminToken);
+    const targetId = listBefore.json.data.items.find((a) => a.email === 'admin-user@test.com')._id;
+    const deleteSelf = await apiAs('DELETE', `/admins/${targetId}`, adminToken);
+    assert.equal(deleteSelf.status, 403, 'Regular admin should not be able to delete admins');
+
+    // Log in as superadmin
+    const superLogin = await api('POST', '/auth/login', {
+      auth: false,
+      body: { email: 'admin@test.com', password: 'StrongPass123!' },
+    });
+    assert.equal(superLogin.status, 200);
+    const superToken = superLogin.json.data.token;
+    assert.equal(superLogin.json.data.admin.role, 'superadmin');
+
+    // Superadmin CAN create a superadmin
+    const createSuperBySuper = await apiAs('POST', '/admins', superToken, {
+      body: { email: 'extra-super@test.com', password: 'SuperPass789!', role: 'superadmin' },
+    });
+    assert.equal(createSuperBySuper.status, 201, 'Superadmin should be able to create superadmin');
+
+    // Superadmin CAN create an admin
+    const createAdminBySuper = await apiAs('POST', '/admins', superToken, {
+      body: { email: 'new-admin-by-super@test.com', password: 'AdminPass999!', role: 'admin' },
+    });
+    assert.equal(createAdminBySuper.status, 201, 'Superadmin should be able to create admin');
+
+    // Superadmin CANNOT delete a superadmin
+    const listSupers = await apiAs('GET', '/admins', superToken);
+    const superId = listSupers.json.data.items.find((a) => a.email === 'extra-super@test.com')._id;
+    const deleteSuper = await apiAs('DELETE', `/admins/${superId}`, superToken);
+    assert.equal(deleteSuper.status, 403, 'Superadmin should not be able to delete superadmin accounts');
+
+    // Superadmin CAN delete an admin account
+    const listAdminsOnly = await apiAs('GET', '/admins', superToken);
+    const adminId = listAdminsOnly.json.data.items.find((a) => a.email === 'new-admin-by-super@test.com')._id;
+    const deleteAdminBySuper = await apiAs('DELETE', `/admins/${adminId}`, superToken);
+    assert.equal(deleteAdminBySuper.status, 200, 'Superadmin should be able to delete admin accounts');
+
+    // Verify the deleted admin can no longer log in
+    const deletedLogin = await api('POST', '/auth/login', {
+      auth: false,
+      body: { email: 'new-admin-by-super@test.com', password: 'AdminPass999!' },
+    });
+    assert.equal(deletedLogin.status, 401, 'Deleted admin account should not be able to log in');
+
+    // Superadmin CANNOT delete themselves
+    const deleteSelfSuper = await apiAs('DELETE', `/admins/${superLogin.json.data.admin._id}`, superToken);
+    assert.equal(deleteSelfSuper.status, 400, 'Superadmin should not be able to delete their own account');
+
+    // Non-existent ID → 404
+    const fakeId = new mongoose.Types.ObjectId().toString();
+    const deleteFake = await apiAs('DELETE', `/admins/${fakeId}`, superToken);
+    assert.equal(deleteFake.status, 404, 'Deleting non-existent admin should return 404');
+
+    // Invalid ID format → 404
+    const deleteInvalid = await apiAs('DELETE', '/admins/not-an-id', superToken);
+    assert.equal(deleteInvalid.status, 404, 'Deleting with invalid ID should return 404');
+   });
+
+   await t.test('rejects an invalid token', async () => {
+     const saved = token;
+     token = 'invalid.token.value';
+     const res = await api('GET', '/projects');
+     token = saved;
+     assert.equal(res.status, 401);
+   });
+
+   await t.test('creates projects with unique codes and empty records', async () => {
     const a = await api('POST', '/projects', { body: { name: 'Project A' } });
     assert.equal(a.status, 201);
     assert.ok(a.json.data.project.projectCode);
@@ -256,12 +399,53 @@ test('Construction Management API', { skip: !RUN && 'Set TEST_MONGODB_URI to run
     assert.equal(aDetail.json.data.totals.estimatedMaterialValue, 32500 + 38000);
   });
 
+  await t.test('exports project materials, expenses and summary as CSV', async () => {
+    const materials = await api('GET', `/projects/${projectA._id}/export/materials`, { raw: true });
+    assert.equal(materials.status, 200);
+    assert.match(materials.res.headers.get('content-type'), /text\/csv/);
+    assert.match(materials.res.headers.get('content-disposition'), /attachment/);
+    assert.match(materials.text, /Name,Category,Quantity/);
+    assert.match(materials.text, /Iron/);
+
+    const expenses = await api('GET', `/projects/${projectA._id}/export/expenses`, { raw: true });
+    assert.equal(expenses.status, 200);
+    assert.match(expenses.text, /Title,Category,Amount/);
+    assert.match(expenses.text, /Labor/);
+
+    const summary = await api('GET', `/projects/${projectA._id}/export/summary`, { raw: true });
+    assert.equal(summary.status, 200);
+    assert.match(summary.text, /Estimated Material Value/);
+  });
+
+  await t.test('exports the dashboard rollup as CSV', async () => {
+    const res = await api('GET', '/dashboard/export', { raw: true });
+    assert.equal(res.status, 200);
+    assert.match(res.res.headers.get('content-type'), /text\/csv/);
+    assert.match(res.text, /Project,Code,Status/);
+    assert.match(res.text, /Project A/);
+  });
+
+  await t.test('rejects CSV export for an unknown project', async () => {
+    const res = await api('GET', '/projects/000000000000000000000000/export/materials');
+    assert.equal(res.status, 404);
+  });
+
   await t.test('aggregates dashboard statistics from the database', async () => {
     const res = await api('GET', '/dashboard/summary');
     assert.equal(res.status, 200);
     assert.equal(res.json.data.stats.totalProjects, 2);
     assert.equal(res.json.data.stats.totalMaterialEntries, 3);
     assert.equal(res.json.data.stats.totalRecordedExpenses, 45000);
+
+    // Chart series for the dashboard visualisations.
+    assert.ok(Array.isArray(res.json.data.charts.expenseTrend));
+    assert.equal(res.json.data.charts.expenseTrend.length, 6);
+    assert.ok(res.json.data.charts.expensesByCategory.some((c) => c.category === 'labor'));
+    const statusTotal = res.json.data.charts.projectsByStatus.reduce(
+      (sum, row) => sum + row.count,
+      0
+    );
+    assert.equal(statusTotal, res.json.data.stats.totalProjects);
   });
 
   await t.test('supports search and filters', async () => {

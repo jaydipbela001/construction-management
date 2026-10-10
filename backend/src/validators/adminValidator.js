@@ -3,14 +3,8 @@ const { isEmpty } = require('../utils/helpers');
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 const MIN_PASSWORD_LENGTH = 8;
+const ALLOWED_ROLES = ['admin', 'superadmin'];
 
-/**
- * Validator for POST /api/admins (create a new admin).
- *
- * Pure function: returns clean data or throws ApiError(400).
- * The plain password leaves this function only to be hashed in the controller;
- * it is never stored or returned.
- */
 function validateCreateAdmin(body = {}) {
   const errors = {};
   const data = {};
@@ -33,6 +27,15 @@ function validateCreateAdmin(body = {}) {
     errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`;
   } else {
     data.password = String(body.password);
+  }
+
+  if (body.role !== undefined && body.role !== null && !isEmpty(body.role)) {
+    const r = String(body.role).trim().toLowerCase();
+    if (!ALLOWED_ROLES.includes(r)) {
+      errors.role = 'Role must be either admin or superadmin';
+    } else {
+      data.role = r;
+    }
   }
 
   if (Object.keys(errors).length > 0) {

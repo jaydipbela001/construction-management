@@ -9,15 +9,22 @@ import {
   TrendingUp,
   Plus,
   AlertCircle,
+  Download,
+  Printer,
 } from 'lucide-react';
 import dashboardService from '../services/dashboardService';
+import reportService from '../services/reportService';
 import StatCard from '../components/StatCard';
 import PageHeader from '../components/PageHeader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import LineChart from '../components/charts/LineChart';
+import DonutChart from '../components/charts/DonutChart';
+import BarChart from '../components/charts/BarChart';
 import { formatCurrency } from '../utils/currency';
 import { formatDate } from '../utils/date';
 import { STATUS_LABEL, STATUS_TONE } from '../utils/constants';
+import { useToast } from '../hooks/useToast';
 import './Dashboard.css';
 
 function StatusBadge({ status }) {
@@ -25,9 +32,11 @@ function StatusBadge({ status }) {
 }
 
 export default function Dashboard() {
+  const toast = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -49,7 +58,30 @@ export default function Dashboard() {
     };
   }, []);
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await reportService.exportDashboard();
+      toast.success('Dashboard CSV downloaded.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to export the dashboard.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const stats = data?.stats;
+  const charts = data?.charts;
+
+  const statusRows = (charts?.projectsByStatus || []).map((row) => ({
+    label: STATUS_LABEL[row.status] || row.status,
+    value: row.count,
+  }));
+
+  const categoryRows = (charts?.expensesByCategory || []).map((row) => ({
+    label: row.category || 'Uncategorized',
+    value: row.total,
+  }));
 
   return (
     <div className="page">
@@ -57,10 +89,25 @@ export default function Dashboard() {
         title="Dashboard"
         subtitle="A live overview of your construction projects, materials, and expenses."
         actions={
-          <Link to="/projects/new" className="btn btn-primary">
-            <Plus size={16} aria-hidden="true" />
-            New Project
-          </Link>
+          <>
+            <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
+              <Printer size={16} aria-hidden="true" />
+              Print Report
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleExport}
+              disabled={exporting}
+            >
+              <Download size={16} aria-hidden="true" />
+              {exporting ? 'Exporting…' : 'Export CSV'}
+            </button>
+            <Link to="/projects/new" className="btn btn-primary">
+              <Plus size={16} aria-hidden="true" />
+              New Project
+            </Link>
+          </>
         }
       />
 
@@ -123,7 +170,39 @@ export default function Dashboard() {
           <LoadingSpinner label="Loading dashboard…" />
         </div>
       ) : (
-        <div className="dashboard-grid mt-6">
+        <>
+          <div className="chart-grid mt-6">
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Spending trend</h2>
+                <span className="text-secondary chart-cap">Last 6 months</span>
+              </div>
+              <LineChart
+                data={(charts?.expenseTrend || []).map((row) => ({
+                  key: row.key,
+                  label: row.label,
+                  value: row.total,
+                }))}
+                formatValue={(v) => formatCurrency(v, { compact: true })}
+              />
+            </section>
+
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Expenses by category</h2>
+              </div>
+              <DonutChart data={categoryRows} formatValue={(v) => formatCurrency(v)} />
+            </section>
+
+            <section className="card chart-grid__wide">
+              <div className="card-header">
+                <h2 className="card-title">Projects by status</h2>
+              </div>
+              <BarChart data={statusRows} formatValue={(v) => String(v)} />
+            </section>
+          </div>
+
+          <div className="dashboard-grid mt-6">
           <section className="card">
             <div className="card-header">
               <h2 className="card-title">Recent Projects</h2>
@@ -222,6 +301,7 @@ export default function Dashboard() {
             )}
           </section>
         </div>
+        </>
       )}
     </div>
   );

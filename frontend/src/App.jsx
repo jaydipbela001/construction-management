@@ -9,6 +9,7 @@ import ProjectDetails from './pages/ProjectDetails';
 import Materials from './pages/Materials';
 import Expenses from './pages/Expenses';
 import Admins from './pages/Admins';
+import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import { useAuth } from './hooks/useAuth';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/projects/:projectId/materials" element={<Materials />} />
         <Route path="/projects/:projectId/expenses" element={<Expenses />} />
         <Route path="/admins" element={<Admins />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

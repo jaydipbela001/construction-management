@@ -163,11 +163,13 @@ Private routes require `Authorization: Bearer <token>`.
 
 ### Auth
 
-| Method | Path                | Description                     |
-| ------ | ------------------- | ------------------------------- |
-| POST   | `/api/auth/login`   | Log in, returns `{ token, admin }` |
-| GET    | `/api/auth/me`      | Current admin (protected)       |
-| POST   | `/api/auth/logout`  | Stateless logout ack            |
+| Method | Path                       | Description                     |
+| ------ | -------------------------- | ------------------------------- |
+| POST   | `/api/auth/login`          | Log in, returns `{ token, admin }` |
+| GET    | `/api/auth/me`             | Current admin (protected)       |
+| POST   | `/api/auth/logout`         | Stateless logout ack            |
+| PATCH  | `/api/auth/profile`        | Update own name/email (protected) |
+| POST   | `/api/auth/change-password`| Update own password (protected) |
 
 ### Projects (protected)
 
@@ -207,11 +209,29 @@ DELETE /api/projects/:projectId/expenses/:expenseId
 
 Query params: `search`, `category`, `from`, `to`, `sortBy`, `order`, `page`, `limit`.
 
+### Reports / export (protected)
+
+CSV downloads. Set the `Accept`/token via the app's axios instance; responses include
+`Content-Disposition: attachment`.
+
+```
+GET    /api/dashboard/export                       Portfolio rollup (one row per project)
+GET    /api/projects/:projectId/export/materials   Project materials
+GET    /api/projects/:projectId/export/expenses    Project expenses
+GET    /api/projects/:projectId/export/summary     Project financial summary
+```
+
+A printable report is available in the browser via the dashboard/project **Print** buttons
+(print stylesheet in `index.css`).
+
 ### Dashboard (protected)
 
 | Method | Path                      | Description                          |
 | ------ | ------------------------- | ------------------------------------ |
-| GET    | `/api/dashboard/summary`  | Aggregated statistics + recent items |
+| GET    | `/api/dashboard/summary`  | Aggregated statistics + chart series + recent items |
+
+The summary also includes `charts.{expenseTrend, expensesByCategory, projectsByStatus}` which
+drive the dashboard visualisations.
 
 Status codes: `200` reads/updates, `201` creation, `400` validation, `401` unauthenticated,
 `403` forbidden, `404` missing, `409` conflict (duplicate project code), `500` server error.
@@ -317,19 +337,27 @@ npm run dev --prefix backend      # Express + nodemon on :5000
 npm run dev --prefix frontend     # Vite dev server on :5173 (proxies /api)
 npm run build --prefix frontend   # production build -> frontend/dist
 npm run lint --prefix frontend    # oxlint
+npm test --prefix frontend        # Vitest + React Testing Library
 npm run create-admin --prefix backend
 npm run seed --prefix backend
 ```
 
 ### Tests
 
-The backend includes an integration test suite (`backend/tests/api.test.js`) covering
-authentication, project isolation, validation, totals, dashboard aggregation, and cascade
-deletion. It **drops** the database it connects to, so it only runs when an explicit test
-database is provided:
+The backend ships two suites:
+
+- `unit` — pure CSV/auth-validator/dashboard-helper tests, always run.
+- `integration` — `backend/tests/api.test.js`, which **drops** the database it connects to, so it
+  only runs when an explicit test database is provided:
 
 ```bash
 TEST_MONGODB_URI="mongodb://127.0.0.1:27017/construction_test" npm test --prefix backend
+```
+
+The frontend test suite (Vitest + React Testing Library) runs without a database:
+
+```bash
+npm test --prefix frontend
 ```
 
 

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { HardHat, LayoutDashboard, FolderKanban, Users, LogOut, X } from 'lucide-react';
+import { HardHat, LayoutDashboard, FolderKanban, Users, User, LogOut, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import './Sidebar.css';
 
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/admins', label: 'Admins', icon: Users },
+  { to: '/profile', label: 'Profile', icon: User },
 ];
 
 export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {

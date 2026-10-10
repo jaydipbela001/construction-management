@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Eye, EyeOff, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, ShieldCheck, Trash, UserPlus, Users } from 'lucide-react';
 import adminService from '../services/adminService';
 import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../hooks/useAuth';
 import { formatDate } from '../utils/date';
 import './Admins.css';
 
-const EMPTY_FORM = { name: '', email: '', password: '', confirmPassword: '' };
+const EMPTY_FORM = { name: '', email: '', password: '', confirmPassword: '', role: 'admin' };
 const MIN_PASSWORD_LENGTH = 8;
 
 function PasswordField({ id, label, value, onChange, error, placeholder, disabled, autoComplete }) {
@@ -57,10 +58,12 @@ export default function Admins() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [errors, setErrors] = useState({});
-  const [serverError, setServerError] = useState('');
+   const [modalOpen, setModalOpen] = useState(false);
+   const [form, setForm] = useState(EMPTY_FORM);
+   const [errors, setErrors] = useState({});
+   const [serverError, setServerError] = useState('');
+   const [confirmTarget, setConfirmTarget] = useState(null);
+   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchAdmins = useCallback(async () => {
@@ -133,38 +136,64 @@ export default function Admins() {
     }
   };
 
-  const columns = [
-    {
-      key: 'name',
-      header: 'Admin',
-      render: (row) => (
-        <div className="admin-cell">
-          <span className="admin-cell__avatar" aria-hidden="true">
-            {(row.name || row.email || 'A').charAt(0).toUpperCase()}
-          </span>
-          <div className="admin-cell__meta">
-            <span className="admin-cell__name">
-              {row.name || 'Administrator'}
-              {currentAdmin && row.email === currentAdmin.email ? (
-                <span className="badge badge-info admin-cell__you">You</span>
-              ) : null}
-            </span>
-            <span className="admin-cell__email">{row.email}</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'role',
-      header: 'Role',
-      render: () => <span className="badge badge-neutral">Administrator</span>,
-    },
-    {
-      key: 'createdAt',
-      header: 'Added',
-      render: (row) => formatDate(row.createdAt),
-    },
-  ];
+   const columns = [
+     {
+       key: 'name',
+       header: 'Admin',
+       render: (row) => (
+         <div className="admin-cell">
+           <span className="admin-cell__avatar" aria-hidden="true">
+             {(row.name || row.email || 'A').charAt(0).toUpperCase()}
+           </span>
+           <div className="admin-cell__meta">
+             <span className="admin-cell__name">
+               {row.name || 'Administrator'}
+               {currentAdmin && row.email === currentAdmin.email ? (
+                 <span className="badge badge-info admin-cell__you">You</span>
+               ) : null}
+             </span>
+             <span className="admin-cell__email">{row.email}</span>
+           </div>
+         </div>
+       ),
+     },
+     {
+       key: 'role',
+       header: 'Role',
+       render: (row) => {
+         const roleBadgeClass = row.role === 'superadmin' ? 'badge-warning' : 'badge-neutral';
+         const roleLabel = row.role === 'superadmin' ? 'Superadmin' : 'Admin';
+         return <span className={`badge ${roleBadgeClass}`}>{roleLabel}</span>;
+       },
+     },
+     {
+       key: 'actions',
+       header: '',
+       render: (row) => {
+         const isSelf = currentAdmin && row.email === currentAdmin.email;
+         const canDelete = currentAdmin?.role === 'superadmin' && row.role === 'admin' && !isSelf;
+         if (!canDelete) return null;
+         return (
+           <button
+             type="button"
+             className="btn btn-sm btn-danger"
+             onClick={() => {
+               setConfirmTarget(row);
+             }}
+             disabled={deleting}
+             aria-label={`Delete ${row.email}`}
+           >
+             <Trash size={16} aria-hidden="true" />
+           </button>
+         );
+       },
+     },
+     {
+       key: 'createdAt',
+       header: 'Added',
+       render: (row) => formatDate(row.createdAt),
+     },
+   ];
 
   return (
     <div className="page">
@@ -287,18 +316,59 @@ export default function Admins() {
             disabled={submitting}
           />
 
-          <PasswordField
-            id="admin-confirm"
-            label="Confirm password"
-            autoComplete="new-password"
-            value={form.confirmPassword}
-            onChange={(e) => setField('confirmPassword', e.target.value)}
-            error={errors.confirmPassword}
-            placeholder="Re-enter password"
-            disabled={submitting}
-          />
-        </form>
-      </Modal>
-    </div>
+           <PasswordField
+             id="admin-confirm"
+             label="Confirm password"
+             autoComplete="new-password"
+             value={form.confirmPassword}
+             onChange={(e) => setField('confirmPassword', e.target.value)}
+             error={errors.confirmPassword}
+             placeholder="Re-enter password"
+             disabled={submitting}
+           />
+           {currentAdmin?.role === 'superadmin' && (
+             <div className="form-group">
+               <label className="form-label" htmlFor="admin-role">
+                 Role
+               </label>
+               <select
+                 id="admin-role"
+                 className="form-control"
+                 value={form.role || 'admin'}
+                 onChange={(e) => setField('role', e.target.value)}
+                 disabled={submitting}
+               >
+                 <option value="admin">Admin</option>
+                 <option value="superadmin">Superadmin</option>
+               </select>
+             </div>
+           )}
+         </form>
+       </Modal>
+       <ConfirmDialog
+         open={!!confirmTarget}
+         title="Delete admin"
+         message={`Are you sure you want to delete ${confirmTarget?.email}? This action cannot be undone.`}
+         confirmLabel="Delete"
+         cancelLabel="Cancel"
+         onConfirm={async () => {
+           setDeleting(true);
+           try {
+             await adminService.remove(confirmTarget.id);
+             setConfirmTarget(null);
+             setDeleting(false);
+             toast.success('Admin deleted.');
+             fetchAdmins();
+           } catch (err) {
+             setDeleting(false);
+             toast.error(err.message || 'Failed to delete admin.');
+           }
+         }}
+         onCancel={() => {
+           setConfirmTarget(null);
+         }}
+         loading={deleting}
+       />
+     </div>
   );
 }

@@ -47,9 +47,20 @@ export function AuthProvider({ children }) {
     setAdmin(null);
   }, []);
 
+  const updateAdmin = useCallback((nextAdmin) => {
+    setAdmin(nextAdmin);
+  }, []);
+
   const value = useMemo(
-    () => ({ admin, initializing, isAuthenticated: Boolean(admin), login, logout }),
-    [admin, initializing, login, logout]
+    () => ({
+      admin,
+      initializing,
+      isAuthenticated: Boolean(admin),
+      login,
+      logout,
+      updateAdmin,
+    }),
+    [admin, initializing, login, logout, updateAdmin]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

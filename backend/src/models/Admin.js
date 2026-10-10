@@ -21,6 +21,12 @@ const adminSchema = new mongoose.Schema(
       trim: true,
       default: 'Administrator',
     },
+    role: {
+      type: String,
+      enum: ['admin', 'superadmin'],
+      required: true,
+      default: 'admin',
+    },
   },
   { timestamps: true }
 );
@@ -38,6 +44,7 @@ adminSchema.methods.toSafeJSON = function toSafeJSON() {
     id: this._id,
     email: this.email,
     name: this.name,
+    role: this.role,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   };

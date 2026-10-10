@@ -13,6 +13,16 @@ export const authService = {
     return data.data.admin;
   },
 
+  async updateProfile(payload) {
+    const { data } = await api.patch('/auth/profile', payload);
+    return data.data.admin;
+  },
+
+  async changePassword(payload) {
+    const { data } = await api.post('/auth/change-password', payload);
+    return data.data;
+  },
+
   async logout() {
     try {
       await api.post('/auth/logout');
