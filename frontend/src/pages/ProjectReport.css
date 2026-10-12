@@ -1,0 +1,407 @@
+/* ============================================================
+   Printable project report (PDF)
+   On screen: a paper-like document preview.
+   On paper: clean, coloured, professional A4 output.
+   ============================================================ */
+
+.report {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-6) var(--space-12);
+}
+
+.report__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.report__doc {
+  /* The report is a "paper" document: always render it with the light
+     palette, even when the app is in dark mode. */
+  --color-primary: #1e293b;
+  --color-primary-600: #334155;
+  --color-primary-400: #475569;
+  --color-accent: #f59e0b;
+  --color-accent-dark: #d97706;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-text: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 48px 52px;
+}
+
+/* ---- Masthead ---- */
+.report__masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.report__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-accent);
+  color: #1f2937;
+}
+
+.report__brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.report__brand-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.report__brand-sub {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+}
+
+.report__doc-title {
+  text-align: right;
+}
+
+.report__doc-title h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.report__doc-title p {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Identity ---- */
+.report__identity {
+  padding: 24px 0 0;
+}
+
+.report__eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+}
+
+.report__project-name {
+  margin-top: 4px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.report__project-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.report__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+
+.report__status {
+  color: var(--color-text);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* ---- Summary metrics ---- */
+.report__summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.report__metric {
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-muted);
+}
+
+.report__metric-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+.report__metric-value {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.report__metric-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.66rem;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Sections ---- */
+.report__section {
+  margin-top: 30px;
+}
+
+.report__section-title {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.report__section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.report__section-head .report__section-title {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.report__section-count {
+  font-size: 0.74rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ---- Details grid ---- */
+.report__details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin-top: 16px;
+}
+
+.report__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report__detail-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.report__detail-value {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.report__description {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* ---- Tables ---- */
+.report__table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.report__table th,
+.report__table td {
+  padding: 7px 9px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.report__table thead th {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-bottom: none;
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.report__table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.report__table tfoot td {
+  background: var(--color-surface-muted);
+  border-top: 2px solid var(--color-primary);
+  border-bottom: none;
+  font-weight: 700;
+}
+
+.report__col-num {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.report__cell-strong {
+  font-weight: 600;
+}
+
+.report__cell-sub {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.report__total-label {
+  text-align: right !important;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.report__total-value {
+  font-size: 0.86rem;
+}
+
+.report__empty {
+  margin-top: 12px;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Footer ---- */
+.report__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 36px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 900px) {
+  .report {
+    padding: var(--space-5) var(--space-4) var(--space-10);
+  }
+  .report__doc {
+    padding: 28px 22px;
+  }
+  .report__summary,
+  .report__details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .report__masthead {
+    flex-direction: column;
+  }
+  .report__doc-title {
+    text-align: left;
+  }
+}
+
+/* ============================================================
+   Print
+   ============================================================ */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  .report {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .report__toolbar {
+    display: none !important;
+  }
+
+  .report__doc {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Keep brand colours and backgrounds on paper. */
+  .report__doc,
+  .report__doc * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Repeat table headers across pages and avoid splitting rows. */
+  .report__table thead {
+    display: table-header-group;
+  }
+  .report__table tr {
+    break-inside: avoid;
+  }
+  .report__section,
+  .report__summary,
+  .report__identity {
+    break-inside: avoid;
+  }
+}

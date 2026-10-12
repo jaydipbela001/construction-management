@@ -4,8 +4,24 @@ const {
   buildProjectMaterialsCsv,
   buildProjectExpensesCsv,
   buildProjectSummaryCsv,
+  buildProjectReport,
   buildDashboardCsv,
 } = require('../services/reportService');
+
+/**
+ * GET /api/projects/:projectId/report
+ * JSON payload (project + totals + all materials + all expenses) that the
+ * frontend renders into a printable PDF report.
+ */
+async function getProjectReport(req, res, next) {
+  try {
+    const project = await findProjectOrFail(req.params.projectId);
+    const report = await buildProjectReport(project);
+    return res.status(200).json({ success: true, data: report });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 /**
  * GET /api/dashboard/export
@@ -60,6 +76,7 @@ async function exportProjectSummary(req, res, next) {
 }
 
 module.exports = {
+  getProjectReport,
   exportDashboard,
   exportProjectMaterials,
   exportProjectExpenses,

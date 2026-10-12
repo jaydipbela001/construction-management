@@ -139,10 +139,10 @@ export default function ProjectDetails() {
         ]}
         actions={
           <>
-            <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
+            <Link to={`/projects/${projectId}/report`} className="btn btn-secondary">
               <Printer size={16} aria-hidden="true" />
-              Print
-            </button>
+              PDF Report
+            </Link>
             <button
               type="button"
               className="btn btn-secondary"

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const adminCache = require('../utils/adminCache');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -33,9 +34,13 @@ async function protect(req, _res, next) {
       throw new ApiError(401, 'Invalid authentication token.');
     }
 
-    const admin = await Admin.findById(payload.sub);
+    let admin = adminCache.get(payload.sub);
     if (!admin) {
-      throw new ApiError(401, 'The account for this session no longer exists.');
+      admin = await Admin.findById(payload.sub);
+      if (!admin) {
+        throw new ApiError(401, 'The account for this session no longer exists.');
+      }
+      adminCache.set(admin);
     }
 
     req.admin = admin;

@@ -29,6 +29,11 @@ async function download(url, fallbackName) {
 }
 
 export const reportService = {
+  async getProjectReport(projectId) {
+    const { data } = await api.get(`/projects/${projectId}/report`);
+    return data.data; // { project, totals, materials, expenses }
+  },
+
   exportDashboard() {
     return download('/dashboard/export', 'buildtrack-dashboard.csv');
   },

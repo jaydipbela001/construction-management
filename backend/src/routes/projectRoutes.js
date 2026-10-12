@@ -6,6 +6,7 @@ const {
   updateProject,
   deleteProject,
 } = require('../controllers/projectController');
+const { getProjectReport } = require('../controllers/reportController');
 const { validateRequest } = require('../middleware/validateRequest');
 const { validateCreateProject, validateUpdateProject } = require('../validators/projectValidator');
 const materialRoutes = require('./materialRoutes');
@@ -24,6 +25,9 @@ router
   .get(getProject)
   .patch(validateRequest(validateUpdateProject), updateProject)
   .delete(deleteProject);
+
+// Full JSON payload for the printable project report (PDF).
+router.get('/:projectId/report', getProjectReport);
 
 // Nested resources: materials and expenses always live under a project.
 // mergeParams (in those routers) makes :projectId available to their controllers.

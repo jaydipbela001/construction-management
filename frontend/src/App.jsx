@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import CreateProject from './pages/CreateProject';
 import ProjectDetails from './pages/ProjectDetails';
+import ProjectReport from './pages/ProjectReport';
 import Materials from './pages/Materials';
 import Expenses from './pages/Expenses';
 import Admins from './pages/Admins';
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/new" element={<CreateProject />} />
         <Route path="/projects/:projectId" element={<ProjectDetails />} />
+        <Route path="/projects/:projectId/report" element={<ProjectReport />} />
         <Route path="/projects/:projectId/edit" element={<CreateProject />} />
         <Route path="/projects/:projectId/materials" element={<Materials />} />
         <Route path="/projects/:projectId/expenses" element={<Expenses />} />

@@ -35,7 +35,7 @@ test('shows role badges and hides delete button for non-superadmin', async () =>
 
   // Check role badges
   expect(screen.getByText('Admin')).toHaveClass('badge-neutral');
-  expect(screen.getByText('Superadmin')).toHaveClass('badge-warning'));
+  expect(screen.getByText('Superadmin')).toHaveClass('badge-warning');
 
   // Check that delete buttons are NOT present (non-superadmin cannot see delete)
   const deleteButtons = screen.getAllByRole('button', { name: /delete/i });

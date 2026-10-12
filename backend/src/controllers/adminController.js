@@ -1,4 +1,5 @@
 const Admin = require('../models/Admin');
+const adminCache = require('../utils/adminCache');
 const ApiError = require('../utils/ApiError');
 
 async function listAdmins(_req, res, next) {
@@ -52,6 +53,7 @@ async function deleteAdmin(req, res, next) {
       throw new ApiError(400, 'Cannot delete your own account.');
     }
     await target.deleteOne();
+    adminCache.invalidate(target._id);
     return res.status(200).json({ success: true, data: { message: 'Admin deleted.' } });
   } catch (error) {
     return next(error);

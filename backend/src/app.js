@@ -50,6 +50,21 @@ function createApp() {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
+  // Optional per-request timing. Set DEBUG_TIMING=true in Vercel env vars to
+  // see exactly how long each request spends before responding.
+  if (process.env.DEBUG_TIMING === 'true') {
+    app.use((req, res, next) => {
+      const startedAt = Date.now();
+      res.on('finish', () => {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[timing] ${req.method} ${req.originalUrl} -> ${res.statusCode} in ${Date.now() - startedAt}ms (instance uptime ${process.uptime().toFixed(2)}s)`
+        );
+      });
+      next();
+    });
+  }
+
   // Liveness check. Intentionally does not touch the database.
   app.get('/api/health', (_req, res) => {
     res.status(200).json({ success: true, data: { status: 'ok', time: new Date().toISOString() } });

@@ -138,6 +138,45 @@ async function buildProjectSummaryCsv(project) {
   };
 }
 
+/**
+ * Full report payload for one project: the project itself, its financial
+ * totals and every material and expense row. Used by the printable PDF report.
+ */
+async function buildProjectReport(project) {
+  const [materials, expenses] = await Promise.all([
+    Material.find({ projectId: project._id }).sort({ createdAt: -1 }).lean(),
+    Expense.find({ projectId: project._id }).sort({ expenseDate: -1 }).lean(),
+  ]);
+
+  const estimatedMaterialValue = materials.reduce(
+    (sum, m) => sum + (m.quantity || 0) * (m.unitPrice || 0),
+    0
+  );
+  const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+
+  const enrichedMaterials = materials.map((m) => {
+    const quantity = m.quantity || 0;
+    const used = m.usedQuantity || 0;
+    return {
+      ...m,
+      lineTotal: roundMoney(quantity * (m.unitPrice || 0)),
+      currentStock: Math.round((quantity - used) * 1000) / 1000,
+    };
+  });
+
+  return {
+    project,
+    totals: {
+      materialCount: materials.length,
+      expenseCount: expenses.length,
+      estimatedMaterialValue: roundMoney(estimatedMaterialValue),
+      totalExpenses: roundMoney(totalExpenses),
+    },
+    materials: enrichedMaterials,
+    expenses,
+  };
+}
+
 /** Portfolio-wide rollup: one row per project with its financial totals. */
 async function buildDashboardCsv() {
   const [projects, materialAgg, expenseAgg] = await Promise.all([
@@ -194,5 +233,6 @@ module.exports = {
   buildProjectMaterialsCsv,
   buildProjectExpensesCsv,
   buildProjectSummaryCsv,
+  buildProjectReport,
   buildDashboardCsv,
 };
