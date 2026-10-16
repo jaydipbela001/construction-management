@@ -359,6 +359,62 @@
   }
 }
 
+/* ---- Mobile (phones) ---- */
+@media (max-width: 600px) {
+  .report {
+    padding: var(--space-3) var(--space-2) var(--space-8);
+  }
+
+  .report__doc {
+    padding: 20px 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .report__summary,
+  .report__details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .report__project-name {
+    font-size: 1.2rem;
+  }
+
+  /* Wrap tables in a scrollable container so they never overflow */
+  .report__section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .report__table {
+    min-width: 520px; /* forces scroll on phones instead of clipping */
+    font-size: 0.72rem;
+  }
+
+  .report__table th,
+  .report__table td {
+    padding: 5px 6px;
+  }
+
+  .report__table thead th {
+    font-size: 0.6rem;
+  }
+
+  .report__metric {
+    padding: 10px 12px;
+  }
+
+  .report__metric-value {
+    font-size: 1rem;
+  }
+
+  .report__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
 /* ============================================================
    Print
    ============================================================ */

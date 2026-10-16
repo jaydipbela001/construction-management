@@ -177,6 +177,7 @@ export default function ProjectReport() {
             <span className="report__section-count">{formatNumber(materials.length)} items</span>
           </div>
           {materials.length ? (
+            <div className="report__table-wrap">
             <table className="report__table">
               <thead>
                 <tr>
@@ -222,6 +223,7 @@ export default function ProjectReport() {
                 </tr>
               </tfoot>
             </table>
+            </div>
           ) : (
             <p className="report__empty">No materials recorded for this project.</p>
           )}
